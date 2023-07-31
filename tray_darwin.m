@@ -19,6 +19,7 @@
 static NSApplication* app;
 static NSStatusBar* statusBar;
 static NSStatusItem* statusItem;
+static AppDelegate *delegate;
 
 static NSMenu* _tray_menu(struct tray_menu *m) {
     NSMenu* menu = [[NSMenu alloc] init];
@@ -32,8 +33,9 @@ static NSMenu* _tray_menu(struct tray_menu *m) {
                 initWithTitle:[NSString stringWithUTF8String:m->text]
                 action:@selector(menuCallback:)
                 keyEquivalent:@""];
+            menuItem.target = delegate;
             [menuItem setEnabled:(m->disabled ? FALSE : TRUE)];
-            [menuItem setState:(m->checked ? 1 : 0)];
+            [menuItem setState:(m->checked ? NSControlStateValueOn : NSControlStateValueOff)];
             [menuItem setRepresentedObject:[NSValue valueWithPointer:m]];
             [menu addItem:menuItem];
             if (m->submenu != NULL) {
@@ -45,23 +47,23 @@ static NSMenu* _tray_menu(struct tray_menu *m) {
 }
 
 int tray_init(struct tray *tray) {
-    AppDelegate *delegate = [[AppDelegate alloc] init];
+    delegate = [[AppDelegate alloc] init];
     app = [NSApplication sharedApplication];
-    [app setDelegate:delegate];
+    //[app setDelegate:delegate];
     statusBar = [NSStatusBar systemStatusBar];
     statusItem = [statusBar statusItemWithLength:NSVariableStatusItemLength];
     tray_update(tray);
-    [app activateIgnoringOtherApps:TRUE];
+    //[app activateIgnoringOtherApps:TRUE];
     return 0;
 }
 
 int tray_loop(int blocking) {
-    NSDate* until = (blocking ? [NSDate distantFuture] : [NSDate distantPast]);
-    NSEvent* event = [app nextEventMatchingMask:ULONG_MAX untilDate:until
-        inMode:[NSString stringWithUTF8String:"kCFRunLoopDefaultMode"] dequeue:TRUE];
-    if (event) {
-        [app sendEvent:event];
-    }
+    // NSDate* until = (blocking ? [NSDate distantFuture] : [NSDate distantPast]);
+    // NSEvent* event = [app nextEventMatchingMask:ULONG_MAX untilDate:until
+    //     inMode:[NSString stringWithUTF8String:"kCFRunLoopDefaultMode"] dequeue:TRUE];
+    // if (event) {
+    //     [app sendEvent:event];
+    // }
     return 0;
 }
 
@@ -74,6 +76,6 @@ void tray_update(struct tray *tray) {
 }
 
 void tray_exit(void) {
-    [app terminate:app];
+    //[app terminate:app];
 }
 
